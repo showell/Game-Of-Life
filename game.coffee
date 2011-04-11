@@ -1,3 +1,6 @@
+# This is Conway's Game of Life, with some tests interspersed.
+#
+# See game.html and game.js in the same repo to run this in a browser.
 assert = (cond) -> 
   if !cond
     debugger

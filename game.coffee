@@ -13,13 +13,13 @@ abstract_game_of_life = (world_factory, point_lives_next_gen) ->
       new_world.set(cell, fate)
     new_world
  
-do () ->
+do ->
   # test with a one-cell world first
-  world_factory = () ->
+  world_factory = ->
     cells = [false]
     obj =
       cells:
-        () -> [0]
+        -> [0]
       num_alive_neighbors:
         (i) -> 0
       alive:
@@ -27,7 +27,7 @@ do () ->
       set:
         (i, fate) -> cells[0] = fate
       status:
-        () -> cells[0]
+        -> cells[0]
   toggle = (alive, n) -> !alive
   f = abstract_game_of_life(world_factory, toggle)
   w = world_factory()
@@ -44,13 +44,13 @@ point_lives_next_gen = (alive, n) ->
   else
     n == 3
 
-do() ->
+do ->
   assert point_lives_next_gen(true, 2)
   assert point_lives_next_gen(true, 3)
   assert point_lives_next_gen(false, 3)
   assert !point_lives_next_gen(false, 4)
 
-data_2d = () ->
+data_2d = ->
   hash = {}
   key = (point) ->
     [x, y] = point
@@ -61,7 +61,7 @@ data_2d = () ->
     set: (point, fate) ->
       hash[key(point)] = fate
 
-do() ->
+do ->
   d = data_2d()
   assert !d.alive([5,7])
   d.set([5,7], true)
@@ -86,7 +86,7 @@ get_toroidal_neighbors = (point, width, height) ->
     yy = (y + dy + height) % height
     [xx, yy]
 
-do() ->
+do ->
   result = get_toroidal_neighbors([1,1], 10, 10)
   expected = [
     [0,0], [1,0], [2,0],
@@ -97,7 +97,7 @@ do() ->
 
 world = (width, height) ->
   data = data_2d()
-  cells = () ->
+  cells = ->
     points = []
     for x in [0...width]
       for y in [0...height]
@@ -117,7 +117,7 @@ world = (width, height) ->
     cells: cells
     num_alive_neighbors: num_alive_neighbors
 
-do() ->
+do ->
   w = world(10, 10)
   assert(w.cells().length == 100)
   w.set([5,5], true)
@@ -136,12 +136,12 @@ do() ->
 
 
 board_transform_function = (width, height) ->
-  create_world = () -> world(width, height)
+  create_world = -> world(width, height)
   abstract_game_of_life(
     create_world,
     point_lives_next_gen)
 
-do() ->
+do ->
   f = board_transform_function()
   w = world(10, 10)
   w.set([0,0], true)
@@ -154,7 +154,7 @@ do() ->
   assert(w.alive([1,0]))
   assert(w.alive([1,1]))
 
-seed_coords = () ->
+seed_coords = ->
   seed = [
     "X      ",
     "       ",
@@ -175,7 +175,7 @@ seed_world = (world) ->
   for coord in seed_coords()
     world.set(coord, true)
 
-do() ->
+do ->
   w = world(20, 20)
   seed_world(w)
   assert(w.alive([5, 5]))
@@ -210,7 +210,7 @@ animate = (initial_data, step_function, render_func, delay, max_ticks) ->
   tick = 0
   current_data = initial_data
 
-  pulse = () ->
+  pulse = ->
     tick += 1
     render_func(current_data)
     if (tick < max_ticks)
@@ -219,7 +219,7 @@ animate = (initial_data, step_function, render_func, delay, max_ticks) ->
       setTimeout(pulse, delay)
   pulse()
 
-do() -> 
+do -> 
   # CONFIGURATION
   WIDTH = 50
   HEIGHT = 40

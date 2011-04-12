@@ -5,8 +5,8 @@ More resources:
   I originally wrote this program in pure Javascript, where I did a
   much better job of commenting:
 
-https://gist.github.com/908317#file_game_of_life.html
+    [original JS version](https://gist.github.com/908317#file_game_of_life.html)
 
-There is also a screencast.
+  There is also a screencast.
 
-http://www.viddler.com/explore/Showell/videos/1/
+    [screencast](http://www.viddler.com/explore/Showell/videos/1/)

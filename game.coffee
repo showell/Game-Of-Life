@@ -131,7 +131,7 @@ do ->
 # The objects that use "world" are still abstracted from many
 # details of the game.  But our implementation here restricts
 # us to a rectangular two-dimensional toroidal geometry.
-world = (width, height) ->
+pacman_world = (width, height) ->
   # Create our internal data structure and populate it.
   data = data_2d()
   # We use "do ->" to make sure we don't pollute our scope
@@ -163,7 +163,7 @@ world = (width, height) ->
 # <hr>
 # Testing.
 do ->
-  w = world(10, 10)
+  w = pacman_world(10, 10)
   assert(w.cells().length == 100)
   w.set([5,5], true)
   assert(w.alive([5,5]))
@@ -204,14 +204,14 @@ do ->
 # Our transform function uses an abstract method to do the heavy
 # lifting.  We are just configuring stuff here.
 board_transform_function = (width, height) ->
-  create_world = -> world(width, height)
+  create_world = -> pacman_world(width, height)
   abstract_game_of_life(
     create_world,
     point_lives_next_gen)
 
 do ->
   f = board_transform_function()
-  w = world(10, 10)
+  w = pacman_world(10, 10)
   w.set([0,0], true)
   w.set([1,0], true)
   w.set([2,0], true)
@@ -244,7 +244,7 @@ seed_world = (world) ->
     world.set(coord, true)
 
 do ->
-  w = world(20, 20)
+  w = pacman_world(20, 20)
   seed_world(w)
   assert(w.alive([5, 5]))
   assert(w.alive([7, 5]))
@@ -294,7 +294,7 @@ do ->
   MAX_TICKS = 800
   DELAY = 5 # milliseconds
 
-  initial_world = world(WIDTH, HEIGHT)
+  initial_world = pacman_world(WIDTH, HEIGHT)
   seed_world(initial_world)
   render_function = display(WIDTH, HEIGHT).render_board
   data_transform_function = board_transform_function(WIDTH, HEIGHT)

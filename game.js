@@ -1,5 +1,5 @@
 (function() {
-  var abstract_game_of_life, animate, assert, board_transform_function, data_2d, display, get_toroidal_neighbors, point_lives_next_gen, seed_coords, seed_world, view_2d, world;
+  var abstract_game_of_life, animate, assert, board_transform_function, data_2d, display, get_toroidal_neighbors, pacman_world, point_lives_next_gen, seed_coords, seed_world, view_2d;
   assert = function(cond) {
     if (!cond) {
       debugger;
@@ -98,7 +98,7 @@
     expected = [[0, 0], [1, 0], [2, 0], [0, 1], [2, 1], [0, 2], [1, 2], [2, 2]];
     return assert(result.toString() === expected.toString());
   })();
-  world = function(width, height) {
+  pacman_world = function(width, height) {
     var cells, data, num_alive_neighbors, obj;
     data = data_2d();
     cells = (function() {
@@ -140,7 +140,7 @@
   };
   (function() {
     var w;
-    w = world(10, 10);
+    w = pacman_world(10, 10);
     assert(w.cells().length === 100);
     w.set([5, 5], true);
     assert(w.alive([5, 5]));
@@ -170,14 +170,14 @@
   board_transform_function = function(width, height) {
     var create_world;
     create_world = function() {
-      return world(width, height);
+      return pacman_world(width, height);
     };
     return abstract_game_of_life(create_world, point_lives_next_gen);
   };
   (function() {
     var f, w;
     f = board_transform_function();
-    w = world(10, 10);
+    w = pacman_world(10, 10);
     w.set([0, 0], true);
     w.set([1, 0], true);
     w.set([2, 0], true);
@@ -219,7 +219,7 @@
   };
   (function() {
     var w;
-    w = world(20, 20);
+    w = pacman_world(20, 20);
     seed_world(w);
     assert(w.alive([5, 5]));
     assert(w.alive([7, 5]));
@@ -284,7 +284,7 @@
     HEIGHT = 40;
     MAX_TICKS = 800;
     DELAY = 5;
-    initial_world = world(WIDTH, HEIGHT);
+    initial_world = pacman_world(WIDTH, HEIGHT);
     seed_world(initial_world);
     render_function = display(WIDTH, HEIGHT).render_board;
     data_transform_function = board_transform_function(WIDTH, HEIGHT);

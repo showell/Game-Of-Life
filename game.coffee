@@ -1,5 +1,7 @@
 # This is Conway's Game of Life, with some tests interspersed.
 # It is written in Coffeescript.
+#
+# [live demo](http://shpaml.webfactional.com/misc/Game-Of-Life/game.html)
 
 # <hr>
 # At an abstract level, the Game of Live just involves cells

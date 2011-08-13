@@ -2,13 +2,6 @@
 # It is written in Coffeescript.
 
 # <hr>
-# To keep things simple, we roll our own assert method.
-assert = (cond) -> 
-  if !cond
-    debugger
-    throw("assertion error")
-
-# <hr>
 # At an abstract level, the Game of Live just involves cells
 # that mutate according to their own liveness and the number of 
 # alive neighbors.  Details about the world's geometry or exact
@@ -32,6 +25,13 @@ abstract_game_of_life = (world_factory, point_lives_next_gen) ->
       new_world.set(cell, fate)
     new_world
  
+# <hr>
+# To keep things simple, we roll our own assert method.
+assert = (cond) -> 
+  if !cond
+    debugger
+    throw("assertion error")
+
 # <hr>
 # Inling unit testing.  We don't need a complicated world to test
 # out the basic logic of an abstract game.  In fact, we use a 
@@ -222,7 +222,14 @@ do ->
   assert(w.alive([1,0]))
   assert(w.alive([1,1]))
 
+# <hr>
+# Seed our world with a configuration of cells.  This specific seeding has
+# the nice property that the simulation will run for quite a while with
+# many interesting variations.
 seed_coords = ->
+  # We could seed coordinates more directly than this algorithm, but we
+  # represent the coordinates with strings to make the program easier to
+  # inspect.
   seed = [
     "X      ",
     "       ",
@@ -250,6 +257,9 @@ do ->
   assert(w.alive([7, 5]))
   assert(!w.alive([8, 5]))
 
+# <hr>
+# Drawing code.  There is nothing fancy here. We represent a 2D
+# matrix of cells using rectangles on a canvas.
 view_2d = (width, height) ->
   canvas = document.getElementById("canvas")
   ctx = canvas.getContext("2d")
@@ -266,14 +276,21 @@ view_2d = (width, height) ->
     y = y * h
     ctx.fillRect(x, y, w, h)
 
+# <hr>
+# This object ties together a view-agnostic model with a model-agnostic view.
+# It is very light, but it decouples two objects that do more heavy lifting.
 display = (width, height) ->
   view = view_2d(width, height)
-  render_board: (board) ->
+  render_board: (world) ->
     for x in [0...width]
       for y in [0...height]
-        fate = board.alive([x, y])
+        fate = world.alive([x, y])
         view.draw(x, y, fate)
 
+# <hr>
+# This is a very abstract animation object.  It doesn't know anything about
+# the Game of Life.  It just renders frames in succession, using a step_function
+# to iterate from one opaque data object to another.
 animate = (initial_data, step_function, render_func, delay, max_ticks) ->
   tick = 0
   current_data = initial_data
@@ -287,6 +304,8 @@ animate = (initial_data, step_function, render_func, delay, max_ticks) ->
       setTimeout(pulse, delay)
   pulse()
 
+# <hr>
+# Now we set everything in motion!
 do -> 
   # CONFIGURATION
   WIDTH = 50
@@ -294,10 +313,14 @@ do ->
   MAX_TICKS = 800
   DELAY = 5 # milliseconds
 
+  # Set up our key objects, starting with our model.
   initial_world = pacman_world(WIDTH, HEIGHT)
   seed_world(initial_world)
+  # Layer on rendering.
   render_function = display(WIDTH, HEIGHT).render_board
+  # Create the function to evolve our model.
   data_transform_function = board_transform_function(WIDTH, HEIGHT)
+  # And then animate it.
   animate(
     initial_world,
     data_transform_function,

@@ -1,11 +1,5 @@
 (function() {
   var abstract_game_of_life, animate, assert, board_transform_function, data_2d, display, get_toroidal_neighbors, pacman_world, point_lives_next_gen, seed_coords, seed_world, view_2d;
-  assert = function(cond) {
-    if (!cond) {
-      debugger;
-      throw "assertion error";
-    }
-  };
   abstract_game_of_life = function(world_factory, point_lives_next_gen) {
     return function(old_world) {
       var cell, fate, is_alive, n, new_world, _i, _len, _ref;
@@ -20,6 +14,12 @@
       }
       return new_world;
     };
+  };
+  assert = function(cond) {
+    if (!cond) {
+      debugger;
+      throw "assertion error";
+    }
   };
   (function() {
     var f, toggle, w, world_factory;
@@ -245,7 +245,7 @@
     var view;
     view = view_2d(width, height);
     return {
-      render_board: function(board) {
+      render_board: function(world) {
         var fate, x, y, _results;
         _results = [];
         for (x = 0; 0 <= width ? x < width : x > width; 0 <= width ? x++ : x--) {
@@ -253,7 +253,7 @@
             var _results2;
             _results2 = [];
             for (y = 0; 0 <= height ? y < height : y > height; 0 <= height ? y++ : y--) {
-              fate = board.alive([x, y]);
+              fate = world.alive([x, y]);
               _results2.push(view.draw(x, y, fate));
             }
             return _results2;

@@ -1,0 +1,256 @@
+<!DOCTYPE html>  <html> <head>   <title>game.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               game.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>               <p>This is Conway's Game of Life, with some tests interspersed.
+It is written in Coffeescript.</p>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <hr>
+
+<p>At an abstract level, the Game of Live just involves cells
+that mutate according to their own liveness and the number of 
+alive neighbors.  Details about the world's geometry or exact
+rules for survival can be configured later.  </p>
+
+<p>IMPORTANT NOTE: This function returns another function. The
+function it returns will be called several times during the
+simulation (once per generation).</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">abstract_game_of_life = </span><span class="nf">(world_factory, point_lives_next_gen) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>This method controls the functional mapping of an old world to a 
+new world, across one generation.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="k">return</span> <span class="nf">(old_world) -&gt;</span> </pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>We will create a new world and populate it.</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nv">new_world = </span><span class="nx">world_factory</span><span class="p">()</span></pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <p>No fancy algorithm here: we just iterate the entire world.</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="k">for</span> <span class="nx">cell</span> <span class="k">in</span> <span class="nx">old_world</span><span class="p">.</span><span class="nx">cells</span><span class="p">()</span>
+      <span class="nv">is_alive = </span><span class="nx">old_world</span><span class="p">.</span><span class="nx">alive</span><span class="p">(</span><span class="nx">cell</span><span class="p">)</span>
+      <span class="nv">n = </span><span class="nx">old_world</span><span class="p">.</span><span class="nx">num_alive_neighbors</span><span class="p">(</span><span class="nx">cell</span><span class="p">)</span>
+      <span class="nv">fate = </span><span class="nx">point_lives_next_gen</span><span class="p">(</span><span class="nx">is_alive</span><span class="p">,</span> <span class="nx">n</span><span class="p">)</span>
+      <span class="nx">new_world</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">cell</span><span class="p">,</span> <span class="nx">fate</span><span class="p">)</span>
+    <span class="nx">new_world</span>
+ </pre></div>             </td>           </tr>                               <tr id="section-6">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-6">&#182;</a>               </div>               <hr>
+
+<p>To keep things simple, we roll our own assert method.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">assert = </span><span class="nf">(cond) -&gt;</span> 
+  <span class="k">if</span> <span class="o">!</span><span class="nx">cond</span>
+    <span class="nx">debugger</span>
+    <span class="k">throw</span><span class="p">(</span><span class="s2">&quot;assertion error&quot;</span><span class="p">)</span></pre></div>             </td>           </tr>                               <tr id="section-7">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-7">&#182;</a>               </div>               <hr>
+
+<p>Inling unit testing.  We don't need a complicated world to test
+out the basic logic of an abstract game.  In fact, we use a 
+one-cell world.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nx">do</span> <span class="o">-&gt;</span>
+  <span class="nv">world_factory = </span><span class="o">-&gt;</span>
+    <span class="nv">cells = </span><span class="p">[</span><span class="kc">false</span><span class="p">]</span>
+    <span class="nv">obj =</span>
+      <span class="nv">cells:</span>
+        <span class="o">-&gt;</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="nv">num_alive_neighbors:</span>
+        <span class="nf">(i) -&gt;</span> <span class="mi">0</span>
+      <span class="nv">alive:</span>
+        <span class="nf">(i) -&gt;</span> <span class="nx">cells</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
+      <span class="nv">set:</span>
+        <span class="nf">(i, fate) -&gt;</span> <span class="nx">cells</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nx">fate</span>
+      <span class="nv">status:</span>
+        <span class="o">-&gt;</span> <span class="nx">cells</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+  <span class="nv">toggle = </span><span class="nf">(alive, n) -&gt;</span> <span class="o">!</span><span class="nx">alive</span>
+  <span class="nv">f = </span><span class="nx">abstract_game_of_life</span><span class="p">(</span><span class="nx">world_factory</span><span class="p">,</span> <span class="nx">toggle</span><span class="p">)</span>
+  <span class="nv">w = </span><span class="nx">world_factory</span><span class="p">()</span>
+  <span class="nx">assert</span> <span class="o">!</span><span class="nx">w</span><span class="p">.</span><span class="nx">status</span><span class="p">()</span>
+  <span class="nv">w = </span><span class="nx">f</span><span class="p">(</span><span class="nx">w</span><span class="p">)</span>
+  <span class="nx">assert</span> <span class="nx">w</span><span class="p">.</span><span class="nx">status</span><span class="p">()</span>
+  <span class="nv">w = </span><span class="nx">f</span><span class="p">(</span><span class="nx">w</span><span class="p">)</span>
+  <span class="nx">assert</span> <span class="o">!</span><span class="nx">w</span><span class="p">.</span><span class="nx">status</span><span class="p">()</span></pre></div>             </td>           </tr>                               <tr id="section-8">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-8">&#182;</a>               </div>               <hr>
+
+<p>Out internal data structure is a simple hash, with keys that are comma-delimited
+coordinates.  We have a light abstraction here (set/alive), which should be
+durable across other data structures we might choose in the future.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">data_2d = </span><span class="o">-&gt;</span>
+  <span class="nv">hash = </span><span class="p">{}</span>
+  <span class="nv">key = </span><span class="nf">(point) -&gt;</span>
+    <span class="p">[</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">]</span> <span class="o">=</span> <span class="nx">point</span>
+    <span class="s2">&quot;#{x},#{y}&quot;</span>
+  <span class="nv">obj =</span>
+    <span class="nv">set: </span><span class="nf">(point, fate) -&gt;</span>
+      <span class="nx">hash</span><span class="p">[</span><span class="nx">key</span><span class="p">(</span><span class="nx">point</span><span class="p">)]</span> <span class="o">=</span> <span class="nx">fate</span>
+    <span class="nv">alive: </span><span class="nf">(point) -&gt;</span> 
+      <span class="nx">hash</span><span class="p">[</span><span class="nx">key</span><span class="p">(</span><span class="nx">point</span><span class="p">)]</span></pre></div>             </td>           </tr>                               <tr id="section-9">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-9">&#182;</a>               </div>               <hr>
+
+<p>Testing an object with two methods is fairly straightforward.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nx">do</span> <span class="o">-&gt;</span>
+  <span class="nv">d = </span><span class="nx">data_2d</span><span class="p">()</span>
+  <span class="nx">assert</span> <span class="o">!</span><span class="nx">d</span><span class="p">.</span><span class="nx">alive</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span><span class="mi">7</span><span class="p">])</span>
+  <span class="nx">d</span><span class="p">.</span><span class="nx">set</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span><span class="mi">7</span><span class="p">],</span> <span class="kc">true</span><span class="p">)</span>
+  <span class="nx">assert</span> <span class="nx">d</span><span class="p">.</span><span class="nx">alive</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span><span class="mi">7</span><span class="p">])</span></pre></div>             </td>           </tr>                               <tr id="section-10">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-10">&#182;</a>               </div>               <hr>
+
+<p>Our geometry is toroidal, which is a fancy term for saying we
+work like PacMan.  The left/right edges of the world are virtually
+connected to each other, as are the bottom/top.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">get_toroidal_neighbors = </span><span class="nf">(point, width, height) -&gt;</span>
+  <span class="p">[</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">]</span> <span class="o">=</span> <span class="nx">point</span></pre></div>             </td>           </tr>                               <tr id="section-11">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-11">&#182;</a>               </div>               <p>Perhaps a little overly clever in the code layout here?  These are 
+actually 1-D arrays with eight values each.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">x_deltas = </span><span class="p">[</span>
+    <span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="mi">0</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>
+    <span class="o">-</span><span class="mi">1</span><span class="p">,</span>      <span class="mi">1</span><span class="p">,</span>
+    <span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="mi">0</span><span class="p">,</span>  <span class="mi">1</span>
+  <span class="p">]</span>
+  <span class="nv">y_deltas = </span><span class="p">[</span>
+    <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+     <span class="mi">0</span><span class="p">,</span>      <span class="mi">0</span><span class="p">,</span>
+     <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span>
+  <span class="p">]</span></pre></div>             </td>           </tr>                               <tr id="section-12">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-12">&#182;</a>               </div>               <p>Now we will return the coordinates of the eight neighbors, using the
+relative values from above.  </p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nx">x_deltas</span><span class="p">.</span><span class="nx">map</span> <span class="nf">(dx, i) -&gt;</span>
+    <span class="nv">dy = </span><span class="nx">y_deltas</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span></pre></div>             </td>           </tr>                               <tr id="section-13">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-13">&#182;</a>               </div>               <p>A little gotch in Javascript in modular
+arithmetic is that -1 % 10 is -1, not 9 as you expect. Since dx can
+be negative, we have to add width first.</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nv">xx = </span><span class="p">(</span><span class="nx">x</span> <span class="o">+</span> <span class="nx">dx</span> <span class="o">+</span> <span class="nx">width</span><span class="p">)</span> <span class="o">%</span> <span class="nx">width</span>
+    <span class="nv">yy = </span><span class="p">(</span><span class="nx">y</span> <span class="o">+</span> <span class="nx">dy</span> <span class="o">+</span> <span class="nx">height</span><span class="p">)</span> <span class="o">%</span> <span class="nx">height</span>
+    <span class="p">[</span><span class="nx">xx</span><span class="p">,</span> <span class="nx">yy</span><span class="p">]</span></pre></div>             </td>           </tr>                               <tr id="section-14">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-14">&#182;</a>               </div>               <hr>
+
+<p>Testing.  Writing in a very functional style makes code easy to test.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nx">do</span> <span class="o">-&gt;</span>
+  <span class="nv">result = </span><span class="nx">get_toroidal_neighbors</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+  <span class="nv">expected = </span><span class="p">[</span>
+    <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span>        <span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
+  <span class="p">]</span>
+  <span class="nx">assert</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">toString</span><span class="p">()</span> <span class="o">==</span> <span class="nx">expected</span><span class="p">.</span><span class="nx">toString</span><span class="p">())</span></pre></div>             </td>           </tr>                               <tr id="section-15">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-15">&#182;</a>               </div>               <hr>
+
+<p>Our "world" object makes this program implement a concrete
+version of the Game of Life.  There are many variations.</p>
+
+<p>The objects that use "world" are still abstracted from many
+details of the game.  But our implementation here restricts
+us to a rectangular two-dimensional toroidal geometry.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">pacman_world = </span><span class="nf">(width, height) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-16">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-16">&#182;</a>               </div>               <p>Create our internal data structure and populate it.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">data = </span><span class="nx">data_2d</span><span class="p">()</span></pre></div>             </td>           </tr>                               <tr id="section-17">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-17">&#182;</a>               </div>               <p>We use "do ->" to make sure we don't pollute our scope
+for one-time setup.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">cells = </span><span class="nx">do</span> <span class="o">-&gt;</span>
+    <span class="nv">points = </span><span class="p">[]</span>
+    <span class="k">for</span> <span class="nx">x</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">width</span><span class="p">]</span>
+      <span class="k">for</span> <span class="nx">y</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">height</span><span class="p">]</span>
+        <span class="nx">points</span><span class="p">.</span><span class="nx">push</span><span class="p">([</span><span class="nx">x</span><span class="p">,</span><span class="nx">y</span><span class="p">])</span>
+    <span class="nx">points</span></pre></div>             </td>           </tr>                               <tr id="section-18">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-18">&#182;</a>               </div>               <p>Report the number of alive neighbors for any cell.  This is
+just glue on top of our internal data structure and an
+external function.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">num_alive_neighbors = </span><span class="nf">(loc) -&gt;</span>
+    <span class="nv">num = </span><span class="mi">0</span>
+    <span class="nv">neighbors = </span><span class="nx">get_toroidal_neighbors</span><span class="p">(</span><span class="nx">loc</span><span class="p">,</span> <span class="nx">width</span><span class="p">,</span> <span class="nx">height</span><span class="p">)</span>
+    <span class="k">for</span> <span class="nx">n</span> <span class="k">in</span> <span class="nx">neighbors</span>
+      <span class="nx">num</span> <span class="o">+=</span> <span class="mi">1</span> <span class="k">if</span> <span class="nx">data</span><span class="p">.</span><span class="nx">alive</span><span class="p">(</span><span class="nx">n</span><span class="p">)</span>
+    <span class="nx">num</span></pre></div>             </td>           </tr>                               <tr id="section-19">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-19">&#182;</a>               </div>               <p>Set up our interface to the outside world.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">obj =</span>
+    <span class="nv">alive: </span><span class="nf">(x,y) -&gt;</span> <span class="nx">data</span><span class="p">.</span><span class="nx">alive</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span><span class="nx">y</span><span class="p">)</span>
+    <span class="nv">set: </span><span class="nf">(x,y) -&gt;</span> <span class="nx">data</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span><span class="nx">y</span><span class="p">)</span>
+    <span class="nv">cells: </span><span class="o">-&gt;</span> <span class="nx">cells</span>
+    <span class="nv">num_alive_neighbors: </span><span class="nf">(point) -&gt;</span> <span class="nx">num_alive_neighbors</span><span class="p">(</span><span class="nx">point</span><span class="p">)</span></pre></div>             </td>           </tr>                               <tr id="section-20">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-20">&#182;</a>               </div>               <hr>
+
+<p>Testing.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nx">do</span> <span class="o">-&gt;</span>
+  <span class="nv">w = </span><span class="nx">pacman_world</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+  <span class="nx">assert</span><span class="p">(</span><span class="nx">w</span><span class="p">.</span><span class="nx">cells</span><span class="p">().</span><span class="nx">length</span> <span class="o">==</span> <span class="mi">100</span><span class="p">)</span>
+  <span class="nx">w</span><span class="p">.</span><span class="nx">set</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">],</span> <span class="kc">true</span><span class="p">)</span>
+  <span class="nx">assert</span><span class="p">(</span><span class="nx">w</span><span class="p">.</span><span class="nx">alive</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">]))</span>
+  <span class="nx">assert</span><span class="p">(</span><span class="nx">w</span><span class="p">.</span><span class="nx">num_alive_neighbors</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+  <span class="nx">w</span><span class="p">.</span><span class="nx">set</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">],</span> <span class="kc">true</span><span class="p">)</span>
+  <span class="nx">assert</span><span class="p">(</span><span class="nx">w</span><span class="p">.</span><span class="nx">num_alive_neighbors</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+  <span class="nx">w</span><span class="p">.</span><span class="nx">set</span><span class="p">([</span><span class="mi">6</span><span class="p">,</span><span class="mi">6</span><span class="p">],</span> <span class="kc">true</span><span class="p">)</span>
+  <span class="nx">assert</span><span class="p">(</span><span class="nx">w</span><span class="p">.</span><span class="nx">num_alive_neighbors</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">])</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span></pre></div>             </td>           </tr>                               <tr id="section-21">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-21">&#182;</a>               </div>               <p>try to fool us with a far-off cell</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nx">w</span><span class="p">.</span><span class="nx">set</span><span class="p">([</span><span class="mi">9</span><span class="p">,</span><span class="mi">9</span><span class="p">],</span> <span class="kc">true</span><span class="p">)</span>
+  <span class="nx">assert</span><span class="p">(</span><span class="nx">w</span><span class="p">.</span><span class="nx">num_alive_neighbors</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">])</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span></pre></div>             </td>           </tr>                               <tr id="section-22">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-22">&#182;</a>               </div>               <p>kill thy neighbor</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nx">w</span><span class="p">.</span><span class="nx">set</span><span class="p">([</span><span class="mi">6</span><span class="p">,</span><span class="mi">6</span><span class="p">],</span> <span class="kc">false</span><span class="p">)</span>
+  <span class="nx">assert</span><span class="p">(</span><span class="nx">w</span><span class="p">.</span><span class="nx">num_alive_neighbors</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span></pre></div>             </td>           </tr>                               <tr id="section-23">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-23">&#182;</a>               </div>               <hr>
+
+<p>The SURVIVAL RULE.  If you are alive this generation, you need
+2 or 3 neighbors to survive.  Unpopulated cells come into existence
+when there are exactly three neighbors.      </p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">point_lives_next_gen = </span><span class="nf">(alive, n) -&gt;</span>
+  <span class="k">if</span> <span class="nx">alive</span>
+    <span class="nx">n</span> <span class="k">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+  <span class="k">else</span>
+    <span class="nx">n</span> <span class="o">==</span> <span class="mi">3</span></pre></div>             </td>           </tr>                               <tr id="section-24">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-24">&#182;</a>               </div>               <hr>
+
+<p>Inline unit testing.  For a pretty simple functional method, we really 
+just want a smoke test.  Laziness when it comes to testing leads to
+virtuous behavior--we extract methods that are dirt simple.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nx">do</span> <span class="o">-&gt;</span>
+  <span class="nx">assert</span> <span class="nx">point_lives_next_gen</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+  <span class="nx">assert</span> <span class="nx">point_lives_next_gen</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+  <span class="nx">assert</span> <span class="nx">point_lives_next_gen</span><span class="p">(</span><span class="kc">false</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+  <span class="nx">assert</span> <span class="o">!</span><span class="nx">point_lives_next_gen</span><span class="p">(</span><span class="kc">false</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span></pre></div>             </td>           </tr>                               <tr id="section-25">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-25">&#182;</a>               </div>               <hr>
+
+<p>Our transform function uses an abstract method to do the heavy
+lifting.  We are just configuring stuff here.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">board_transform_function = </span><span class="nf">(width, height) -&gt;</span>
+  <span class="nv">create_world = </span><span class="o">-&gt;</span> <span class="nx">pacman_world</span><span class="p">(</span><span class="nx">width</span><span class="p">,</span> <span class="nx">height</span><span class="p">)</span>
+  <span class="nx">abstract_game_of_life</span><span class="p">(</span>
+    <span class="nx">create_world</span><span class="p">,</span>
+    <span class="nx">point_lives_next_gen</span><span class="p">)</span>
+
+<span class="nx">do</span> <span class="o">-&gt;</span>
+  <span class="nv">f = </span><span class="nx">board_transform_function</span><span class="p">()</span>
+  <span class="nv">w = </span><span class="nx">pacman_world</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+  <span class="nx">w</span><span class="p">.</span><span class="nx">set</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="kc">true</span><span class="p">)</span>
+  <span class="nx">w</span><span class="p">.</span><span class="nx">set</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="kc">true</span><span class="p">)</span>
+  <span class="nx">w</span><span class="p">.</span><span class="nx">set</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="kc">true</span><span class="p">)</span>
+  <span class="nx">assert</span><span class="p">(</span><span class="nx">w</span><span class="p">.</span><span class="nx">alive</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]))</span>
+  <span class="nx">assert</span><span class="p">(</span><span class="o">!</span><span class="nx">w</span><span class="p">.</span><span class="nx">alive</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]))</span>
+  <span class="nv">w = </span><span class="nx">f</span><span class="p">(</span><span class="nx">w</span><span class="p">)</span>
+  <span class="nx">assert</span><span class="p">(</span><span class="o">!</span><span class="nx">w</span><span class="p">.</span><span class="nx">alive</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]))</span>
+  <span class="nx">assert</span><span class="p">(</span><span class="nx">w</span><span class="p">.</span><span class="nx">alive</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]))</span>
+  <span class="nx">assert</span><span class="p">(</span><span class="nx">w</span><span class="p">.</span><span class="nx">alive</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]))</span></pre></div>             </td>           </tr>                               <tr id="section-26">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-26">&#182;</a>               </div>               <hr>
+
+<p>Seed our world with a configuration of cells.  This specific seeding has
+the nice property that the simulation will run for quite a while with
+many interesting variations.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">seed_coords = </span><span class="o">-&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-27">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-27">&#182;</a>               </div>               <p>We could seed coordinates more directly than this algorithm, but we
+represent the coordinates with strings to make the program easier to
+inspect.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">seed = </span><span class="p">[</span>
+    <span class="s2">&quot;X      &quot;</span><span class="p">,</span>
+    <span class="s2">&quot;       &quot;</span><span class="p">,</span>
+    <span class="s2">&quot;XX     &quot;</span><span class="p">,</span>
+    <span class="s2">&quot;       &quot;</span><span class="p">,</span>
+    <span class="s2">&quot;  XXX  &quot;</span><span class="p">,</span>
+    <span class="s2">&quot;       &quot;</span><span class="p">,</span>
+    <span class="s2">&quot;   XXX &quot;</span><span class="p">,</span>
+    <span class="s2">&quot;    X  &quot;</span><span class="p">,</span>
+  <span class="p">]</span>
+  <span class="nv">points = </span><span class="p">[]</span>
+  <span class="k">for</span> <span class="nx">s</span><span class="p">,</span> <span class="nx">x</span> <span class="k">in</span> <span class="nx">seed</span>
+    <span class="k">for</span> <span class="nx">y</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">s</span><span class="p">.</span><span class="nx">length</span><span class="p">]</span>
+      <span class="nx">points</span><span class="p">.</span><span class="nx">push</span><span class="p">([</span><span class="nx">x</span><span class="p">,</span><span class="nx">y</span><span class="p">])</span> <span class="k">if</span> <span class="nx">s</span><span class="p">.</span><span class="nx">charAt</span><span class="p">(</span><span class="nx">y</span><span class="p">)</span> <span class="o">!=</span> <span class="s1">&#39; &#39;</span>
+  <span class="p">[</span><span class="nx">x</span><span class="o">+</span><span class="mi">5</span><span class="p">,</span> <span class="nx">y</span><span class="o">+</span><span class="mi">5</span><span class="p">]</span> <span class="k">for</span> <span class="p">[</span><span class="nx">x</span><span class="p">,</span><span class="nx">y</span><span class="p">]</span> <span class="k">in</span> <span class="nx">points</span>
+
+<span class="nv">seed_world = </span><span class="nf">(world) -&gt;</span>
+  <span class="k">for</span> <span class="nx">coord</span> <span class="k">in</span> <span class="nx">seed_coords</span><span class="p">()</span>
+    <span class="nx">world</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">coord</span><span class="p">,</span> <span class="kc">true</span><span class="p">)</span>
+
+<span class="nx">do</span> <span class="o">-&gt;</span>
+  <span class="nv">w = </span><span class="nx">pacman_world</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+  <span class="nx">seed_world</span><span class="p">(</span><span class="nx">w</span><span class="p">)</span>
+  <span class="nx">assert</span><span class="p">(</span><span class="nx">w</span><span class="p">.</span><span class="nx">alive</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">]))</span>
+  <span class="nx">assert</span><span class="p">(</span><span class="nx">w</span><span class="p">.</span><span class="nx">alive</span><span class="p">([</span><span class="mi">7</span><span class="p">,</span> <span class="mi">5</span><span class="p">]))</span>
+  <span class="nx">assert</span><span class="p">(</span><span class="o">!</span><span class="nx">w</span><span class="p">.</span><span class="nx">alive</span><span class="p">([</span><span class="mi">8</span><span class="p">,</span> <span class="mi">5</span><span class="p">]))</span></pre></div>             </td>           </tr>                               <tr id="section-28">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-28">&#182;</a>               </div>               <hr>
+
+<p>Drawing code.  There is nothing fancy here. We represent a 2D
+matrix of cells using rectangles on a canvas.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">view_2d = </span><span class="nf">(width, height) -&gt;</span>
+  <span class="nv">canvas = </span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s2">&quot;canvas&quot;</span><span class="p">)</span>
+  <span class="nv">ctx = </span><span class="nx">canvas</span><span class="p">.</span><span class="nx">getContext</span><span class="p">(</span><span class="s2">&quot;2d&quot;</span><span class="p">)</span>
+
+  <span class="nv">draw: </span><span class="nf">(x, y, fate) -&gt;</span>
+    <span class="nv">ctx.fillStyle = </span>
+      <span class="k">if</span> <span class="nx">fate</span>
+        <span class="s1">&#39;black&#39;</span>
+      <span class="k">else</span>
+        <span class="s1">&#39;white&#39;</span>
+    <span class="nv">w = </span><span class="mi">10</span>
+    <span class="nv">h = </span><span class="mi">10</span>
+    <span class="nv">x = </span><span class="nx">x</span> <span class="o">*</span> <span class="nx">w</span>
+    <span class="nv">y = </span><span class="nx">y</span> <span class="o">*</span> <span class="nx">h</span>
+    <span class="nx">ctx</span><span class="p">.</span><span class="nx">fillRect</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">w</span><span class="p">,</span> <span class="nx">h</span><span class="p">)</span></pre></div>             </td>           </tr>                               <tr id="section-29">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-29">&#182;</a>               </div>               <hr>
+
+<p>This object ties together a view-agnostic model with a model-agnostic view.
+It is very light, but it decouples two objects that do more heavy lifting.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">display = </span><span class="nf">(width, height) -&gt;</span>
+  <span class="nv">view = </span><span class="nx">view_2d</span><span class="p">(</span><span class="nx">width</span><span class="p">,</span> <span class="nx">height</span><span class="p">)</span>
+  <span class="nv">render_board: </span><span class="nf">(world) -&gt;</span>
+    <span class="k">for</span> <span class="nx">x</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">width</span><span class="p">]</span>
+      <span class="k">for</span> <span class="nx">y</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">height</span><span class="p">]</span>
+        <span class="nv">fate = </span><span class="nx">world</span><span class="p">.</span><span class="nx">alive</span><span class="p">([</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">])</span>
+        <span class="nx">view</span><span class="p">.</span><span class="nx">draw</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">fate</span><span class="p">)</span></pre></div>             </td>           </tr>                               <tr id="section-30">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-30">&#182;</a>               </div>               <hr>
+
+<p>This is a very abstract animation object.  It doesn't know anything about
+the Game of Life.  It just renders frames in succession, using a step_function
+to iterate from one opaque data object to another.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">animate = </span><span class="nf">(initial_data, step_function, render_func, delay, max_ticks) -&gt;</span>
+  <span class="nv">tick = </span><span class="mi">0</span>
+  <span class="nv">current_data = </span><span class="nx">initial_data</span>
+
+  <span class="nv">pulse = </span><span class="o">-&gt;</span>
+    <span class="nx">tick</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="nx">render_func</span><span class="p">(</span><span class="nx">current_data</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">tick</span> <span class="o">&lt;</span> <span class="nx">max_ticks</span><span class="p">)</span>
+      <span class="nv">current_data = </span><span class="nx">step_function</span><span class="p">(</span><span class="nx">current_data</span><span class="p">)</span>
+      <span class="nx">render_func</span><span class="p">(</span><span class="nx">current_data</span><span class="p">)</span>
+      <span class="nx">setTimeout</span><span class="p">(</span><span class="nx">pulse</span><span class="p">,</span> <span class="nx">delay</span><span class="p">)</span>
+  <span class="nx">pulse</span><span class="p">()</span></pre></div>             </td>           </tr>                               <tr id="section-31">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-31">&#182;</a>               </div>               <hr>
+
+<p>Now we set everything in motion!</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nx">do</span> <span class="o">-&gt;</span> </pre></div>             </td>           </tr>                               <tr id="section-32">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-32">&#182;</a>               </div>               <p>CONFIGURATION</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">WIDTH = </span><span class="mi">50</span>
+  <span class="nv">HEIGHT = </span><span class="mi">40</span>
+  <span class="nv">MAX_TICKS = </span><span class="mi">800</span>
+  <span class="nv">DELAY = </span><span class="mi">5</span> <span class="c1"># milliseconds</span></pre></div>             </td>           </tr>                               <tr id="section-33">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-33">&#182;</a>               </div>               <p>Set up our key objects, starting with our model.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">initial_world = </span><span class="nx">pacman_world</span><span class="p">(</span><span class="nx">WIDTH</span><span class="p">,</span> <span class="nx">HEIGHT</span><span class="p">)</span>
+  <span class="nx">seed_world</span><span class="p">(</span><span class="nx">initial_world</span><span class="p">)</span></pre></div>             </td>           </tr>                               <tr id="section-34">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-34">&#182;</a>               </div>               <p>Layer on rendering.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">render_function = </span><span class="nx">display</span><span class="p">(</span><span class="nx">WIDTH</span><span class="p">,</span> <span class="nx">HEIGHT</span><span class="p">).</span><span class="nx">render_board</span></pre></div>             </td>           </tr>                               <tr id="section-35">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-35">&#182;</a>               </div>               <p>Create the function to evolve our model.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">data_transform_function = </span><span class="nx">board_transform_function</span><span class="p">(</span><span class="nx">WIDTH</span><span class="p">,</span> <span class="nx">HEIGHT</span><span class="p">)</span></pre></div>             </td>           </tr>                               <tr id="section-36">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-36">&#182;</a>               </div>               <p>And then animate it.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nx">animate</span><span class="p">(</span>
+    <span class="nx">initial_world</span><span class="p">,</span>
+    <span class="nx">data_transform_function</span><span class="p">,</span>
+    <span class="nx">render_function</span><span class="p">,</span>
+    <span class="nx">DELAY</span><span class="p">,</span>
+    <span class="nx">MAX_TICKS</span>
+  <span class="p">)</span>
+
+</pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 

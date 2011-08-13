@@ -55,19 +55,6 @@
     w = f(w);
     return assert(!w.status());
   })();
-  point_lives_next_gen = function(alive, n) {
-    if (alive) {
-      return n === 2 || n === 3;
-    } else {
-      return n === 3;
-    }
-  };
-  (function() {
-    assert(point_lives_next_gen(true, 2));
-    assert(point_lives_next_gen(true, 3));
-    assert(point_lives_next_gen(false, 3));
-    return assert(!point_lives_next_gen(false, 4));
-  })();
   data_2d = function() {
     var hash, key, obj;
     hash = {};
@@ -77,11 +64,11 @@
       return "" + x + "," + y;
     };
     return obj = {
-      alive: function(point) {
-        return hash[key(point)];
-      },
       set: function(point, fate) {
         return hash[key(point)] = fate;
+      },
+      alive: function(point) {
+        return hash[key(point)];
       }
     };
   };
@@ -114,16 +101,16 @@
   world = function(width, height) {
     var cells, data, num_alive_neighbors, obj;
     data = data_2d();
-    cells = function() {
+    cells = (function() {
       var points, x, y;
       points = [];
-      for (x = 0; (0 <= width ? x < width : x > width); (0 <= width ? x += 1 : x -= 1)) {
-        for (y = 0; (0 <= height ? y < height : y > height); (0 <= height ? y += 1 : y -= 1)) {
+      for (x = 0; 0 <= width ? x < width : x > width; 0 <= width ? x++ : x--) {
+        for (y = 0; 0 <= height ? y < height : y > height; 0 <= height ? y++ : y--) {
           points.push([x, y]);
         }
       }
       return points;
-    };
+    })();
     num_alive_neighbors = function(loc) {
       var n, neighbors, num, _i, _len;
       num = 0;
@@ -137,10 +124,18 @@
       return num;
     };
     return obj = {
-      alive: data.alive,
-      set: data.set,
-      cells: cells,
-      num_alive_neighbors: num_alive_neighbors
+      alive: function(x, y) {
+        return data.alive(x, y);
+      },
+      set: function(x, y) {
+        return data.set(x, y);
+      },
+      cells: function() {
+        return cells;
+      },
+      num_alive_neighbors: function(point) {
+        return num_alive_neighbors(point);
+      }
     };
   };
   (function() {
@@ -158,6 +153,19 @@
     assert(w.num_alive_neighbors([5, 5]) === 2);
     w.set([6, 6], false);
     return assert(w.num_alive_neighbors([5, 5]) === 1);
+  })();
+  point_lives_next_gen = function(alive, n) {
+    if (alive) {
+      return n === 2 || n === 3;
+    } else {
+      return n === 3;
+    }
+  };
+  (function() {
+    assert(point_lives_next_gen(true, 2));
+    assert(point_lives_next_gen(true, 3));
+    assert(point_lives_next_gen(false, 3));
+    return assert(!point_lives_next_gen(false, 4));
   })();
   board_transform_function = function(width, height) {
     var create_world;
@@ -186,7 +194,7 @@
     points = [];
     for (x = 0, _len = seed.length; x < _len; x++) {
       s = seed[x];
-      for (y = 0, _ref = s.length; (0 <= _ref ? y < _ref : y > _ref); (0 <= _ref ? y += 1 : y -= 1)) {
+      for (y = 0, _ref = s.length; 0 <= _ref ? y < _ref : y > _ref; 0 <= _ref ? y++ : y--) {
         if (s.charAt(y) !== ' ') {
           points.push([x, y]);
         }
@@ -240,15 +248,15 @@
       render_board: function(board) {
         var fate, x, y, _results;
         _results = [];
-        for (x = 0; (0 <= width ? x < width : x > width); (0 <= width ? x += 1 : x -= 1)) {
+        for (x = 0; 0 <= width ? x < width : x > width; 0 <= width ? x++ : x--) {
           _results.push((function() {
-            var _results;
-            _results = [];
-            for (y = 0; (0 <= height ? y < height : y > height); (0 <= height ? y += 1 : y -= 1)) {
+            var _results2;
+            _results2 = [];
+            for (y = 0; 0 <= height ? y < height : y > height; 0 <= height ? y++ : y--) {
               fate = board.alive([x, y]);
-              _results.push(view.draw(x, y, fate));
+              _results2.push(view.draw(x, y, fate));
             }
-            return _results;
+            return _results2;
           })());
         }
         return _results;

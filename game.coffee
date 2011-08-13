@@ -1,14 +1,30 @@
 # This is Conway's Game of Life, with some tests interspersed.
-#
-# See game.html and game.js in the same repo to run this in a browser.
+# It is written in Coffeescript.
+
+# <hr>
+# To keep things simple, we roll our own assert method.
 assert = (cond) -> 
   if !cond
     debugger
     throw("assertion error")
 
+# <hr>
+# At an abstract level, the Game of Live just involves cells
+# that mutate according to their own liveness and the number of 
+# alive neighbors.  Details about the world's geometry or exact
+# rules for survival can be configured later.  
+#
+# IMPORTANT NOTE: This function returns another function. The
+# function it returns will be called several times during the
+# simulation (once per generation).
+#
 abstract_game_of_life = (world_factory, point_lives_next_gen) ->
+  # This method controls the functional mapping of an old world to a 
+  # new world, across one generation.
   return (old_world) -> 
+    # We will create a new world and populate it.
     new_world = world_factory()
+    # No fancy algorithm here: we just iterate the entire world.
     for cell in old_world.cells()
       is_alive = old_world.alive(cell)
       n = old_world.num_alive_neighbors(cell)
@@ -16,8 +32,11 @@ abstract_game_of_life = (world_factory, point_lives_next_gen) ->
       new_world.set(cell, fate)
     new_world
  
+# <hr>
+# Inling unit testing.  We don't need a complicated world to test
+# out the basic logic of an abstract game.  In fact, we use a 
+# one-cell world.
 do ->
-  # test with a one-cell world first
   world_factory = ->
     cells = [false]
     obj =
@@ -40,38 +59,38 @@ do ->
   w = f(w)
   assert !w.status()
 
-      
-point_lives_next_gen = (alive, n) ->
-  if alive
-    n in [2, 3]
-  else
-    n == 3
 
-do ->
-  assert point_lives_next_gen(true, 2)
-  assert point_lives_next_gen(true, 3)
-  assert point_lives_next_gen(false, 3)
-  assert !point_lives_next_gen(false, 4)
-
+# <hr>
+# Out internal data structure is a simple hash, with keys that are comma-delimited
+# coordinates.  We have a light abstraction here (set/alive), which should be
+# durable across other data structures we might choose in the future.
 data_2d = ->
   hash = {}
   key = (point) ->
     [x, y] = point
     "#{x},#{y}"
   obj =
-    alive: (point) -> 
-      hash[key(point)]
     set: (point, fate) ->
       hash[key(point)] = fate
+    alive: (point) -> 
+      hash[key(point)]
 
+# <hr>
+# Testing an object with two methods is fairly straightforward.
 do ->
   d = data_2d()
   assert !d.alive([5,7])
   d.set([5,7], true)
   assert d.alive([5,7])
 
+# <hr>
+# Our geometry is toroidal, which is a fancy term for saying we
+# work like PacMan.  The left/right edges of the world are virtually
+# connected to each other, as are the bottom/top.
 get_toroidal_neighbors = (point, width, height) ->
   [x, y] = point
+  # Perhaps a little overly clever in the code layout here?  These are 
+  # actually 1-D arrays with eight values each.
   x_deltas = [
     -1,  0,  1,
     -1,      1,
@@ -83,12 +102,19 @@ get_toroidal_neighbors = (point, width, height) ->
      1,  1,  1
   ]
 
+  # Now we will return the coordinates of the eight neighbors, using the
+  # relative values from above.  
   x_deltas.map (dx, i) ->
     dy = y_deltas[i]
+    # A little gotch in Javascript in modular
+    # arithmetic is that -1 % 10 is -1, not 9 as you expect. Since dx can
+    # be negative, we have to add width first.
     xx = (x + dx + width) % width
     yy = (y + dy + height) % height
     [xx, yy]
 
+# <hr>
+# Testing.  Writing in a very functional style makes code easy to test.
 do ->
   result = get_toroidal_neighbors([1,1], 10, 10)
   expected = [
@@ -98,15 +124,28 @@ do ->
   ]
   assert(result.toString() == expected.toString())
 
+# <hr>
+# Our "world" object makes this program implement a concrete
+# version of the Game of Life.  There are many variations.
+# 
+# The objects that use "world" are still abstracted from many
+# details of the game.  But our implementation here restricts
+# us to a rectangular two-dimensional toroidal geometry.
 world = (width, height) ->
+  # Create our internal data structure and populate it.
   data = data_2d()
-  cells = ->
+  # We use "do ->" to make sure we don't pollute our scope
+  # for one-time setup.
+  cells = do ->
     points = []
     for x in [0...width]
       for y in [0...height]
         points.push([x,y])
     points
 
+  # Report the number of alive neighbors for any cell.  This is
+  # just glue on top of our internal data structure and an
+  # external function.
   num_alive_neighbors = (loc) ->
     num = 0
     neighbors = get_toroidal_neighbors(loc, width, height)
@@ -114,12 +153,15 @@ world = (width, height) ->
       num += 1 if data.alive(n)
     num
 
+  # Set up our interface to the outside world.
   obj =
-    alive: data.alive
-    set: data.set
-    cells: cells
-    num_alive_neighbors: num_alive_neighbors
+    alive: (x,y) -> data.alive(x,y)
+    set: (x,y) -> data.set(x,y)
+    cells: -> cells
+    num_alive_neighbors: (point) -> num_alive_neighbors(point)
 
+# <hr>
+# Testing.
 do ->
   w = world(10, 10)
   assert(w.cells().length == 100)
@@ -137,7 +179,30 @@ do ->
   w.set([6,6], false)
   assert(w.num_alive_neighbors([5,5]) == 1)
 
+# <hr>
+# The SURVIVAL RULE.  If you are alive this generation, you need
+# 2 or 3 neighbors to survive.  Unpopulated cells come into existence
+# when there are exactly three neighbors.      
+point_lives_next_gen = (alive, n) ->
+  if alive
+    n in [2, 3]
+  else
+    n == 3
 
+# <hr>
+# Inline unit testing.  For a pretty simple functional method, we really 
+# just want a smoke test.  Laziness when it comes to testing leads to
+# virtuous behavior--we extract methods that are dirt simple.
+do ->
+  assert point_lives_next_gen(true, 2)
+  assert point_lives_next_gen(true, 3)
+  assert point_lives_next_gen(false, 3)
+  assert !point_lives_next_gen(false, 4)
+
+
+# <hr>
+# Our transform function uses an abstract method to do the heavy
+# lifting.  We are just configuring stuff here.
 board_transform_function = (width, height) ->
   create_world = -> world(width, height)
   abstract_game_of_life(
